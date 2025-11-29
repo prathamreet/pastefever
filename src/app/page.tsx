@@ -228,7 +228,7 @@ export default function PasteFever() {
       <header className="border-b border-main bg-alt transition-all duration-300">
         <div className="flex items-center justify-between px-6 h-18">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-soft shadow-lg border border-main flex items-center justify-center">
+            {/* <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-soft shadow-lg border border-main flex items-center justify-center">
               <svg
                 className="w-5 h-5 text-white"
                 fill="none"
@@ -242,12 +242,10 @@ export default function PasteFever() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-            </div>
+            </div> */}
             <div>
               <h1 className="text-lg font-semibold text-main">PasteFever</h1>
-              <p className="text-xs text-muted font-medium">
-                Instant Clipboard Downloads
-              </p>
+             
             </div>
           </div>
 
@@ -330,7 +328,7 @@ export default function PasteFever() {
         <aside className="w-80 border-r border-main bg-alt flex flex-col transition-theme">
           <div className="p-4 border-b border-light">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-medium text-soft uppercase tracking-wide">
+              <h2 className="text-xs font-medium text-soft mt-4 uppercase tracking-wide">
                 History
               </h2>
               {history.length > 0 && (

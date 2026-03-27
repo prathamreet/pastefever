@@ -21,7 +21,7 @@ export const Sidebar = ({
   onSearchChange,
 }: SidebarProps) => {
   return (
-    <aside className="w-80 border-r border-main bg-alt flex flex-col transition-theme">
+    <aside className="w-full border-r border-main bg-alt flex flex-col transition-theme">
       <div className="p-6 border-b border-light space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-main">
@@ -92,19 +92,12 @@ export const Sidebar = ({
                   </svg>
                 )}
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-sm font-bold text-main truncate">
-                    {item.name}
-                  </span>
-                  <span className="text-[10px] text-muted font-medium">
-                    {formatTime(item.timestamp)}
-                  </span>
+              <div className="min-w-0 flex-1 py-0.5">
+                <div className="text-sm font-bold text-main truncate block mb-0.5">
+                  {item.name}
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-muted font-medium uppercase tracking-tight">
-                  <span className="text-main/70">{item.extension}</span>
-                  <div className="w-0.5 h-0.5 rounded-full bg-border"></div>
-                  <span>{item.size}</span>
+                <div className="text-[10px] text-muted font-medium">
+                  {formatTime(item.timestamp)}
                 </div>
               </div>
             </button>

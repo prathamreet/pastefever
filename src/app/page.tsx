@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { HistoryItem } from "@/types";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, generateObjectLabel } from "@/lib/utils";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { DetailView } from "@/components/DetailView";
@@ -28,21 +28,27 @@ export default function PasteFever() {
     (item.extension || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const [sidebarWidth, setSidebarWidth] = useState(500);
+  const [isResizing, setIsResizing] = useState(false);
+
   // Modal state
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [pendingItem, setPendingItem] = useState<HistoryItem | null>(null);
   const [pendingBlob, setPendingBlob] = useState<Blob | null>(null);
 
-  // Initialize theme
+  // Initialize theme and sidebar width
   useEffect(() => {
-    const initTheme = () => {
-      const saved = localStorage.getItem("pf-theme");
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      const theme = saved || (prefersDark ? "dark" : "light");
+    const initApp = () => {
+      // Theme
+      const savedTheme = localStorage.getItem("pf-theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = savedTheme || (prefersDark ? "dark" : "light");
       document.documentElement.setAttribute("data-theme", theme);
       setCurrentTheme(theme as "light" | "dark");
+
+      // Sidebar width
+      const savedWidth = localStorage.getItem("pf-sidebar-width");
+      if (savedWidth) setSidebarWidth(parseInt(savedWidth));
     };
 
     const loadAndHydrateHistory = async () => {
@@ -70,7 +76,7 @@ export default function PasteFever() {
     };
 
     loadAndHydrateHistory();
-    initTheme();
+    initApp();
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
@@ -84,6 +90,41 @@ export default function PasteFever() {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
+
+  // Sidebar resizing logic
+  useEffect(() => {
+    let rafId: number;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const newWidth = Math.max(300, Math.min(800, e.clientX));
+        setSidebarWidth(newWidth);
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (isResizing) {
+        setIsResizing(false);
+        localStorage.setItem("pf-sidebar-width", sidebarWidth.toString());
+      }
+    };
+
+    if (isResizing) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isResizing, sidebarWidth]);
 
   // Paste handler
   useEffect(() => {
@@ -130,8 +171,9 @@ export default function PasteFever() {
     setIsProcessing(true);
 
     const url = URL.createObjectURL(blob);
+    const ts = Date.now();
     const ext = blob.type.split("/")[1] || "png";
-    const name = `pastefever-${Date.now()}.${ext}`;
+    const name = `${generateObjectLabel(ts)}.${ext}`;
     const sizeBytes = blob.size;
 
     const img = new Image();
@@ -142,7 +184,7 @@ export default function PasteFever() {
         size: formatBytes(sizeBytes),
         sizeBytes,
         type: "image",
-        timestamp: Date.now(),
+        timestamp: ts,
         width: img.width,
         height: img.height,
         extension: ext.toUpperCase(),
@@ -158,9 +200,10 @@ export default function PasteFever() {
     setStatusText("Processing text...");
     setIsProcessing(true);
 
+    const ts = Date.now();
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const name = `pastefever-${Date.now()}.txt`;
+    const name = `${generateObjectLabel(ts)}.txt`;
     const sizeBytes = blob.size;
 
     const lines = text.split("\n").length;
@@ -173,7 +216,7 @@ export default function PasteFever() {
       size: formatBytes(sizeBytes),
       sizeBytes,
       type: "text",
-      timestamp: Date.now(),
+      timestamp: ts,
       characters,
       lines,
       words,
@@ -279,16 +322,22 @@ export default function PasteFever() {
       />
 
       <div className="flex-1 flex overflow-hidden">
-        <Sidebar
-          history={filteredHistory}
-          selectedItem={selectedItem}
-          onSelectItem={setSelectedItem}
-          onClearHistory={clearHistory}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+        <div style={{ width: `${sidebarWidth}px` }} className="flex">
+          <Sidebar
+            history={filteredHistory}
+            selectedItem={selectedItem}
+            onSelectItem={setSelectedItem}
+            onClearHistory={clearHistory}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+          <div
+            onMouseDown={() => setIsResizing(true)}
+            className={`w-1 h-full cursor-col-resize hover:bg-accent transition-colors shrink-0 z-50 ${isResizing ? "bg-accent" : "bg-transparent"}`}
+          />
+        </div>
 
-        <main className="flex-1 flex transition-theme">
+        <main className="flex-1 flex transition-theme relative">
           <div className="flex-1 flex flex-col">
             {selectedItem ? (
               <DetailView 

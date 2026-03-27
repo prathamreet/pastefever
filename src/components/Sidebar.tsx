@@ -8,6 +8,8 @@ interface SidebarProps {
   selectedItem: HistoryItem | null;
   onSelectItem: (item: HistoryItem) => void;
   onClearHistory: () => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 export const Sidebar = ({
@@ -15,10 +17,12 @@ export const Sidebar = ({
   selectedItem,
   onSelectItem,
   onClearHistory,
+  searchQuery,
+  onSearchChange,
 }: SidebarProps) => {
   return (
     <aside className="w-80 border-r border-main bg-alt flex flex-col transition-theme">
-      <div className="p-6 border-b border-light">
+      <div className="p-6 border-b border-light space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-main">
             History
@@ -32,12 +36,37 @@ export const Sidebar = ({
             </button>
           )}
         </div>
+
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search files..."
+            className="w-full pl-9 pr-4 py-2 bg-main border border-border rounded-xl text-sm text-main placeholder-faint focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
+          />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {history.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center opacity-40 h-full">
-            <p className="text-xs text-muted">No files yet</p>
+            <p className="text-xs text-muted">
+              {searchQuery ? `No matches for "${searchQuery}"` : "No files yet"}
+            </p>
           </div>
         ) : (
           history.map((item) => (

@@ -1,37 +1,59 @@
 # PasteFever
 
-A minimalist, high-speed utility to instantly convert clipboard content into downloadable files. Perfect for extracting images from web pages or saving text snippets without manual file creation.
+PasteFever is a minimalist web utility for converting clipboard content into files. It is designed for high-speed workflows where you need to save images or text snippets instantly without manual file creation.
 
-## ✨ Features
+## Purpose
+The tool aims to bridge the gap between "copying from the web" and "saving to local storage" with zero friction. It automates the process of naming and downloading assets derived from the system clipboard.
 
-- **Instant Download**: Paste (Ctrl+V) and the file is immediately saved to your Downloads folder.
-- **Smart Detection**: Automatically distinguishes between images (PNG/JPG/GIF) and text.
-- **Total Privacy**: 100% client-side. Your data never leaves your browser.
-- **Modern Interface**: Clean design with dynamic dark/light mode support.
-- **History Tracker**: Keeps a local session history of your recent pastes.
+## Features
+- Instant image and text conversion (PNG, JPG, GIF, WEBP, TXT).
+- Custom file naming prompt on paste.
+- Live session history and file property inspector.
+- Real-time file search.
+- Adaptive light and dark themes.
 
-## 🚀 Getting Started
+## Privacy Policy
+PasteFever is a 100% client-side application. No data is ever transmitted to a server. All processing, storage (IndexedDB), and history management happen locally in your browser.
 
-1.  **Clone & Install**
-    ```bash
-    git clone https://github.com/prathamreet/pastefever.git
-    cd pastefever
-    npm install
-    ```
+## Data Handling
+Files and metadata are stored using the following local browser technologies:
+- **IndexedDB**: High-capacity storage for original file blobs.
+- **LocalStorage**: Persistence for UI preferences and history metadata.
+- **URL.createObjectURL**: Temporary memory allocation for previews.
+Clearing your history via the interface permanently deletes all data from these stores.
 
-2.  **Run Development Server**
-    ```bash
-    npm run dev
-    ```
+## Shortcut Keys
+- **Ctrl + V**: Paste and initiate download.
+- **Enter**: Confirm file name in prompt.
+- **Esc**: Cancel download prompt or deselect object.
 
-3.  **Start Pasting**
-    Open `http://localhost:3000` and just hit `Ctrl+V`.
+## Tech Stack
+- **Framework**: Next.js
+- **Styling**: Tailwind CSS
+- **Language**: TypeScript
+- **Storage**: IndexedDB (Local DB)
 
-## 🛠️ Built With
+## Contribution
+Issues and pull requests are welcome. Feel free to fork the repository and propose changes that enhance the "utility-first" experience.
 
-- [Next.js](https://nextjs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Typescript](https://www.typescriptlang.org/)
+## Build and Run
+Clone the repository:
+```bash
+git clone https://github.com/prathamreet/pastefever.git
+cd pastefever
+```
 
----
-Created with ⚡ by [prathamreet](https://github.com/prathamreet)
+Install dependencies:
+```bash
+npm install
+```
+
+Start the development server:
+```bash
+npm run dev
+```
+
+Build for production:
+```bash
+npm run build
+```

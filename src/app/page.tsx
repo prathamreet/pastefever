@@ -20,7 +20,13 @@ export default function PasteFever() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
+
+  const filteredHistory = history.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.extension || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Modal state
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
@@ -274,10 +280,12 @@ export default function PasteFever() {
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar
-          history={history}
+          history={filteredHistory}
           selectedItem={selectedItem}
           onSelectItem={setSelectedItem}
           onClearHistory={clearHistory}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
         <main className="flex-1 flex transition-theme">

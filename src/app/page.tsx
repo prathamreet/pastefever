@@ -11,6 +11,7 @@ import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { StatusBar } from "@/components/StatusBar";
 import { Toast } from "@/components/Toast";
 import { NameModal } from "@/components/NameModal";
+import { saveFile, getFile, clearAllFiles } from "@/lib/db";
 
 export default function PasteFever() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -24,6 +25,7 @@ export default function PasteFever() {
   // Modal state
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [pendingItem, setPendingItem] = useState<HistoryItem | null>(null);
+  const [pendingBlob, setPendingBlob] = useState<Blob | null>(null);
 
   // Initialize theme
   useEffect(() => {
@@ -37,12 +39,31 @@ export default function PasteFever() {
       setCurrentTheme(theme as "light" | "dark");
     };
 
-    const saved = localStorage.getItem("pf-history");
-    if (saved) {
-      const loadedHistory = JSON.parse(saved);
-      setHistory(loadedHistory);
-    }
+    const loadAndHydrateHistory = async () => {
+      const saved = localStorage.getItem("pf-history");
+      if (!saved) return;
 
+      const loadedHistory: HistoryItem[] = JSON.parse(saved);
+
+      // Hydrate blobs from IndexedDB
+      const hydratedHistory = await Promise.all(
+        loadedHistory.map(async (item) => {
+          try {
+            const blob = await getFile(item.timestamp);
+            if (blob) {
+              return { ...item, url: URL.createObjectURL(blob) };
+            }
+          } catch (e) {
+            console.error("Hydration failed for", item.name, e);
+          }
+          return item; // Fallback to original
+        })
+      );
+
+      setHistory(hydratedHistory);
+    };
+
+    loadAndHydrateHistory();
     initTheme();
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -120,7 +141,7 @@ export default function PasteFever() {
         height: img.height,
         extension: ext.toUpperCase(),
       };
-      complete(item);
+      complete(item, blob);
     };
     img.src = url;
   };
@@ -153,18 +174,19 @@ export default function PasteFever() {
       extension: "TXT",
     };
 
-    complete(item);
+    complete(item, blob);
   };
 
-  const complete = (data: HistoryItem) => {
+  const complete = (data: HistoryItem, blob: Blob) => {
     setPendingItem(data);
+    setPendingBlob(blob);
     setIsNameModalOpen(true);
     setIsProcessing(false);
     setStatusText("Awaiting filename...");
   };
 
-  const confirmDownload = (finalName: string) => {
-    if (!pendingItem) return;
+  const confirmDownload = async (finalName: string) => {
+    if (!pendingItem || !pendingBlob) return;
 
     const data = { ...pendingItem, name: finalName };
 
@@ -173,6 +195,13 @@ export default function PasteFever() {
     a.href = data.url;
     a.download = data.name;
     a.click();
+
+    // Persist blob to IndexedDB
+    try {
+      await saveFile(data.timestamp, pendingBlob);
+    } catch (e) {
+      console.error("Failed to save to IndexedDB", e);
+    }
 
     // Update history
     const newHistory = [data, ...history].slice(0, 100);
@@ -183,12 +212,14 @@ export default function PasteFever() {
     setStatusText("");
     setIsNameModalOpen(false);
     setPendingItem(null);
+    setPendingBlob(null);
     showToastMessage("Downloaded successfully");
   };
 
   const cancelDownload = () => {
     setIsNameModalOpen(false);
     setPendingItem(null);
+    setPendingBlob(null);
     setStatusText("");
   };
 
@@ -213,11 +244,16 @@ export default function PasteFever() {
     setCurrentTheme(next);
   };
 
-  const clearHistory = () => {
+  const clearHistory = async () => {
     if (!confirm("Clear all history?")) return;
     setHistory([]);
     setSelectedItem(null);
     localStorage.removeItem("pf-history");
+    try {
+      await clearAllFiles();
+    } catch (e) {
+      console.error("Failed to clear storage", e);
+    }
   };
 
   const stats = (() => {
@@ -281,5 +317,6 @@ export default function PasteFever() {
     </div>
   );
 }
+
 
 

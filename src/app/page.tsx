@@ -283,7 +283,10 @@ export default function PasteFever() {
         <main className="flex-1 flex transition-theme">
           <div className="flex-1 flex flex-col">
             {selectedItem ? (
-              <DetailView selectedItem={selectedItem} />
+              <DetailView 
+                selectedItem={selectedItem} 
+                onCopySuccess={showToastMessage}
+              />
             ) : (
               <EmptyState isProcessing={isProcessing} />
             )}

@@ -33,7 +33,7 @@ export const EmptyState = ({ isProcessing }: EmptyStateProps) => {
           your device.
         </p>
 
-        <div className="inline-flex items-center gap-3 px-4 py-3 rounded-lg bg-alt border border-main">
+        <div className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-alt border border-main shadow-sm">
           <kbd className="px-3 py-1.5 text-xs font-medium text-soft bg-main rounded border border-border">
             Ctrl
           </kbd>

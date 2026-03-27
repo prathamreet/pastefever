@@ -10,10 +10,10 @@ export const Toast = ({ show, message }: ToastProps) => {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed bottom-6 right-6 px-4 py-3 rounded-lg border border-main bg-alt shadow-lg transition-all duration-300 ${
+      className={`fixed bottom-12 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl border border-main bg-alt shadow-2xl transition-all duration-300 z-[100] ${
         show
           ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-2 pointer-events-none"
+          : "opacity-0 translate-y-4 pointer-events-none"
       }`}
     >
       <div className="flex items-center gap-2">
@@ -30,7 +30,7 @@ export const Toast = ({ show, message }: ToastProps) => {
             d="M5 13l4 4L19 7"
           />
         </svg>
-        <span className="text-sm text-main">{message}</span>
+        <span className="text-sm font-medium text-main">{message}</span>
       </div>
     </div>
   );

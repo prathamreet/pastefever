@@ -12,129 +12,79 @@ export const PropertiesPanel = ({
   onRedownload,
 }: PropertiesPanelProps) => {
   return (
-    <aside className="w-72 border-l border-main bg-alt p-6 overflow-y-auto">
-      <h3 className="text-xs font-medium text-soft uppercase tracking-wide mb-4">
-        Properties
-      </h3>
+    <aside className="w-80 border-l border-main bg-alt flex flex-col transition-theme">
+      <div className="p-6 border-b border-light flex items-center h-16">
+        <h3 className="text-sm font-bold text-main">
+          Details
+        </h3>
+      </div>
 
-      <div className="space-y-4">
-        <div>
-          <label className="text-xs text-muted block mb-1">File name</label>
-          <p className="text-sm text-main font-medium break-all">
-            {selectedItem.name}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs text-muted block mb-1">Type</label>
-            <p className="text-sm text-main font-medium">
-              {selectedItem.extension}
-            </p>
+      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        <section>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wider">File Name</span>
+              <p className="text-sm font-bold text-main break-all">{selectedItem.name}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Format</span>
+                <p className="text-sm font-bold text-main">{(selectedItem.extension || "").toUpperCase()}</p>
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Size</span>
+                <p className="text-sm font-bold text-main">{selectedItem.size}</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="text-xs text-muted block mb-1">Size</label>
-            <p className="text-sm text-main font-medium">{selectedItem.size}</p>
+        </section>
+
+        <section className="space-y-4">
+          <h4 className="text-[10px] font-bold text-faint uppercase tracking-widest border-b border-light pb-2">Technical Stats</h4>
+          <div className="space-y-3">
+            {selectedItem.type === "image" ? (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-medium text-muted">Dimensions</span>
+                  <span className="text-xs font-bold text-main">{selectedItem.width} × {selectedItem.height}px</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-medium text-muted">Aspect Ratio</span>
+                  <span className="text-xs font-bold text-main">
+                    {(selectedItem.width! / selectedItem.height!).toFixed(2)}:1
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-medium text-muted">Lines</span>
+                  <span className="text-xs font-bold text-main">{selectedItem.lines}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-medium text-muted">Characters</span>
+                  <span className="text-xs font-bold text-main">{selectedItem.characters}</span>
+                </div>
+              </>
+            )}
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-muted">Added</span>
+              <span className="text-xs font-bold text-main">
+                {new Date(selectedItem.timestamp).toLocaleDateString()}
+              </span>
+            </div>
           </div>
-        </div>
+        </section>
+      </div>
 
-        {selectedItem.type === "image" && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted block mb-1">Width</label>
-                <p className="text-sm text-main font-medium">
-                  {selectedItem.width}px
-                </p>
-              </div>
-              <div>
-                <label className="text-xs text-muted block mb-1">Height</label>
-                <p className="text-sm text-main font-medium">
-                  {selectedItem.height}px
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs text-muted block mb-1">
-                Resolution
-              </label>
-              <p className="text-sm text-main font-medium">
-                {selectedItem.width && selectedItem.height
-                  ? `${selectedItem.width} × ${selectedItem.height}px`
-                  : "N/A"}
-              </p>
-            </div>
-
-            <div>
-              <label className="text-xs text-muted block mb-1">
-                Aspect Ratio
-              </label>
-              <p className="text-sm text-main font-medium">
-                {selectedItem.width && selectedItem.height
-                  ? `${(selectedItem.width / selectedItem.height).toFixed(2)}:1`
-                  : "N/A"}
-              </p>
-            </div>
-          </>
-        )}
-
-        {selectedItem.type === "text" && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted block mb-1">
-                  Characters
-                </label>
-                <p className="text-sm text-main font-medium">
-                  {selectedItem.characters?.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <label className="text-xs text-muted block mb-1">Words</label>
-                <p className="text-sm text-main font-medium">
-                  {selectedItem.words?.toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs text-muted block mb-1">Lines</label>
-              <p className="text-sm text-main font-medium">
-                {selectedItem.lines?.toLocaleString()}
-              </p>
-            </div>
-          </>
-        )}
-
-        <div>
-          <label className="text-xs text-muted block mb-1">Created</label>
-          <p className="text-sm text-main font-medium">
-            {new Date(selectedItem.timestamp).toLocaleString()}
-          </p>
-        </div>
-
-        <div className="pt-4 border-t border-light">
-          <button
-            onClick={() => onRedownload(selectedItem)}
-            className="w-full px-4 py-2 bg-accent hover:bg-soft text-white rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              />
-            </svg>
-            Download
-          </button>
-        </div>
+      <div className="p-6 border-t border-light bg-main/30">
+        <button
+          onClick={() => onRedownload(selectedItem)}
+          className="w-full py-3 bg-accent text-alt text-sm font-bold rounded-xl hover:bg-main hover:text-main transition-all border border-transparent hover:border-border shadow-sm active:scale-[0.98]"
+        >
+          Download File
+        </button>
       </div>
     </aside>
   );

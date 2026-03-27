@@ -12,6 +12,7 @@ import { StatusBar } from "@/components/StatusBar";
 import { Toast } from "@/components/Toast";
 import { NameModal } from "@/components/NameModal";
 import { saveFile, getFile, clearAllFiles } from "@/lib/db";
+import JSZip from "jszip";
 
 export default function PasteFever() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -286,6 +287,38 @@ export default function PasteFever() {
     setTimeout(() => setShowToast(false), 2000);
   };
 
+  const downloadAllAsZip = async () => {
+    if (history.length === 0) return;
+    
+    setIsProcessing(true);
+    setStatusText("Creating ZIP archive...");
+    const zip = new JSZip();
+
+    try {
+      for (const item of history) {
+        const blob = await getFile(item.timestamp);
+        if (blob) {
+          zip.file(item.name, blob);
+        }
+      }
+
+      const content = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `pastefever-all-${Date.now()}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToastMessage("ZIP archived and downloaded");
+    } catch (e) {
+      console.error("Failed to generate ZIP", e);
+      showToastMessage("Failed to create ZIP");
+    } finally {
+      setIsProcessing(false);
+      setStatusText("");
+    }
+  };
+
   const toggleTheme = () => {
     const next = currentTheme === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
@@ -319,12 +352,14 @@ export default function PasteFever() {
         stats={stats}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
+        onDownloadAll={downloadAllAsZip}
       />
 
       <div className="flex-1 flex overflow-hidden">
         <div style={{ width: `${sidebarWidth}px` }} className="flex">
           <Sidebar
             history={filteredHistory}
+            stats={stats}
             selectedItem={selectedItem}
             onSelectItem={setSelectedItem}
             onClearHistory={clearHistory}

@@ -36,7 +36,7 @@ export const Sidebar = ({
           {history.length > 0 && (
             <button
               onClick={onClearHistory}
-              className="text-xs text-muted hover:text-red-500 transition-colors font-medium"
+              className="text-xs text-muted hover:text-red-500 transition-colors font-medium cursor-pointer"
             >
               Clear all
             </button>

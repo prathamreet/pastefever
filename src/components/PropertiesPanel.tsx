@@ -81,7 +81,7 @@ export const PropertiesPanel = ({
       <div className="p-6 border-t border-light bg-main/30">
         <button
           onClick={() => onRedownload(selectedItem)}
-          className="w-full py-3 bg-accent text-alt text-sm font-bold rounded-xl hover:bg-main hover:text-main transition-all border border-transparent hover:border-border shadow-sm active:scale-[0.98]"
+          className="w-full py-3 bg-accent text-[var(--bg-alt)] hover:bg-soft text-sm font-semibold rounded-xl transition-all shadow-md shadow-accent/10 active:scale-[0.98] cursor-pointer"
         >
           Download File
         </button>

@@ -16,11 +16,11 @@ export const PropertiesPanel = ({
 }: PropertiesPanelProps) => {
   return (
     <aside className="w-80 border-l border-main bg-alt flex flex-col transition-theme">
-      <div className="p-6 border-b border-light flex items-center h-16">
+      {/* <div className="p-6 border-b border-light flex items-center h-16">
         <h3 className="text-sm font-bold text-main">
           Details
         </h3>
-      </div>
+      </div> */}
 
       <div className="flex-1 overflow-y-auto p-6 space-y-8">
         <section>

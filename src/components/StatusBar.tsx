@@ -16,7 +16,7 @@ export const StatusBar = ({
   if (!isProcessing && !statusText) return null;
 
   return (
-    <div className="border-t border-main bg-alt px-6 h-10 flex items-center justify-between z-10 transition-theme overflow-hidden">
+    <div className="border-t border-main bg-alt px-4 md:px-6 h-10 flex items-center justify-between z-10 transition-theme overflow-hidden shrink-0">
       <div className="flex items-center gap-2">
         <div
           className={`w-1.5 h-1.5 rounded-full ${
@@ -29,20 +29,20 @@ export const StatusBar = ({
       </div>
 
       {selectedItem && (
-        <div className="flex items-center gap-4 text-xs font-bold text-muted uppercase tracking-tight">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 md:gap-4 text-[10px] md:text-xs font-bold text-muted uppercase tracking-tight">
+          <div className="flex items-center gap-1">
             <span className="opacity-50 font-medium lowercase">type:</span>
             <span className="text-main">{selectedItem.extension}</span>
           </div>
-          <div className="w-px h-2.5 bg-border"></div>
-          <div className="flex items-center gap-1.5">
+          <div className="w-px h-2.5 bg-border opacity-50"></div>
+          <div className="flex items-center gap-1">
             <span className="opacity-50 font-medium lowercase">size:</span>
             <span className="text-main">{selectedItem.size}</span>
           </div>
           {selectedItem.type === "image" && (
             <>
-              <div className="w-px h-2.5 bg-border"></div>
-              <div className="flex items-center gap-1.5">
+              <div className="w-px h-2.5 bg-border opacity-50 hidden sm:block"></div>
+              <div className="items-center gap-1 hidden sm:flex">
                 <span className="opacity-50 font-medium lowercase">res:</span>
                 <span className="text-main">
                   {selectedItem.width}×{selectedItem.height}

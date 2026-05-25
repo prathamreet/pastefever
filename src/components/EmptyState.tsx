@@ -43,7 +43,7 @@ export const EmptyState = ({ isProcessing }: EmptyStateProps) => {
           </kbd>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-light">
+        {/* <div className="mt-8 pt-8 border-t border-light">
           <p className="text-xs text-muted mb-3">Supported formats</p>
           <div className="flex items-center justify-center gap-2">
             {["PNG", "JPG", "GIF", "WEBP", "TXT"].map((format) => (
@@ -55,7 +55,7 @@ export const EmptyState = ({ isProcessing }: EmptyStateProps) => {
               </span>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

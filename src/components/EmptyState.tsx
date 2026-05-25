@@ -2,9 +2,10 @@
 
 interface EmptyStateProps {
   isProcessing: boolean;
+  onPasteClick?: () => void;
 }
 
-export const EmptyState = ({ isProcessing }: EmptyStateProps) => {
+export const EmptyState = ({ isProcessing, onPasteClick }: EmptyStateProps) => {
   return (
     <div className="flex-1 flex items-center justify-center p-8">
       <div className="text-center max-w-md">
@@ -33,7 +34,8 @@ export const EmptyState = ({ isProcessing }: EmptyStateProps) => {
           your device.
         </p>
 
-        <div className="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-alt border border-main shadow-sm">
+        {/* Desktop Keyboard Prompts */}
+        <div className="hidden md:inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-alt border border-main shadow-sm">
           <kbd className="px-3 py-1.5 text-xs font-medium text-soft bg-main rounded border border-border">
             Ctrl
           </kbd>
@@ -42,6 +44,21 @@ export const EmptyState = ({ isProcessing }: EmptyStateProps) => {
             V
           </kbd>
         </div>
+
+        {/* Mobile Tap to Paste Button */}
+        {onPasteClick && (
+          <div className="md:hidden">
+            <button
+              onClick={onPasteClick}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-accent text-[var(--bg-alt)] hover:bg-soft text-sm font-bold shadow-lg shadow-accent/15 active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              Tap to Paste
+            </button>
+          </div>
+        )}
 
         {/* <div className="mt-8 pt-8 border-t border-light">
           <p className="text-xs text-muted mb-3">Supported formats</p>

@@ -1,14 +1,10 @@
 "use client";
 
 import { HistoryItem } from "@/types";
+import Link from "next/link";
 
 interface HeaderProps {
   history: HistoryItem[];
-  stats: {
-    totalSize: string;
-    imageCount: number;
-    textCount: number;
-  };
   currentTheme: "light" | "dark";
   onToggleTheme: () => void;
   onDownloadAll: () => void;
@@ -17,7 +13,6 @@ interface HeaderProps {
 
 export const Header = ({
   history,
-  stats,
   currentTheme,
   onToggleTheme,
   onDownloadAll,
@@ -27,11 +22,11 @@ export const Header = ({
     <header className="border-b border-main bg-alt transition-theme z-10">
       <div className="flex items-center justify-between px-6 h-16">
         <div className="flex items-center gap-4">
-          <a href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
+          <Link href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
             <h1 className="text-xl font-bold tracking-tight text-main">
               PasteFever
             </h1>
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center gap-1">

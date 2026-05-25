@@ -136,7 +136,7 @@ export default function PasteFever() {
       const items = e.clipboardData?.items;
       if (!items) return;
 
-      for (let item of items) {
+      for (const item of items) {
         if (item.type.includes("image")) {
           const file = item.getAsFile();
           if (file) processImage(file);
@@ -144,7 +144,7 @@ export default function PasteFever() {
         }
       }
 
-      for (let item of items) {
+      for (const item of items) {
         if (item.type === "text/plain") {
           item.getAsString(processText);
           return;
@@ -154,6 +154,7 @@ export default function PasteFever() {
 
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, isNameModalOpen]);
 
   // Escape key for deselection
@@ -398,7 +399,6 @@ export default function PasteFever() {
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-main">
       <Header
         history={history}
-        stats={stats}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
         onDownloadAll={downloadAllAsZip}

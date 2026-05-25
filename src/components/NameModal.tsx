@@ -29,6 +29,7 @@ export const NameModal = ({
       const originalExt =
         lastDotIndex !== -1 ? defaultName.substring(lastDotIndex + 1) : "";
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(nameWithoutExt);
       setExt(originalExt);
 

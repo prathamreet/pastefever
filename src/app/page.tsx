@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { HistoryItem } from "@/types";
-import { formatBytes, generateObjectLabel } from "@/lib/utils";
+import { formatBytes, generateObjectLabel, convertImageBlob } from "@/lib/utils";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { DetailView } from "@/components/DetailView";
@@ -235,10 +235,40 @@ export default function PasteFever() {
     setStatusText("Awaiting filename...");
   };
 
-  const confirmDownload = async (finalName: string) => {
+  const confirmDownload = async (finalName: string, selectedExt: string) => {
     if (!pendingItem || !pendingBlob) return;
 
-    const data = { ...pendingItem, name: finalName };
+    const finalFullName = `${finalName}.${selectedExt}`;
+    let finalBlob = pendingBlob;
+
+    if (pendingItem.type === "image") {
+      setStatusText("Converting image...");
+      finalBlob = await convertImageBlob(pendingBlob, selectedExt);
+    } else if (pendingItem.type === "text") {
+      const mimeTypes: Record<string, string> = {
+        txt: "text/plain",
+        md: "text/plain",
+        json: "application/json",
+        html: "text/html",
+        css: "text/css",
+        js: "application/javascript"
+      };
+      const newMime = mimeTypes[selectedExt] || "text/plain";
+      finalBlob = pendingBlob.slice(0, pendingBlob.size, newMime);
+    }
+
+    // Revoke original object URL to avoid leaks
+    URL.revokeObjectURL(pendingItem.url);
+    const newUrl = URL.createObjectURL(finalBlob);
+
+    const data: HistoryItem = {
+      ...pendingItem,
+      name: finalFullName,
+      url: newUrl,
+      size: formatBytes(finalBlob.size),
+      sizeBytes: finalBlob.size,
+      extension: selectedExt.toUpperCase(),
+    };
 
     // Download
     const a = document.createElement("a");
@@ -248,7 +278,7 @@ export default function PasteFever() {
 
     // Persist blob to IndexedDB
     try {
-      await saveFile(data.timestamp, pendingBlob);
+      await saveFile(data.timestamp, finalBlob);
     } catch (e) {
       console.error("Failed to save to IndexedDB", e);
     }

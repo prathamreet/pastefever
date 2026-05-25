@@ -12,7 +12,6 @@ interface SidebarProps {
   };
   selectedItem: HistoryItem | null;
   onSelectItem: (item: HistoryItem) => void;
-  onClearHistory: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
@@ -22,26 +21,17 @@ export const Sidebar = ({
   stats,
   selectedItem,
   onSelectItem,
-  onClearHistory,
   searchQuery,
   onSearchChange,
 }: SidebarProps) => {
   return (
     <aside className="w-full border-r border-main bg-alt flex flex-col transition-theme">
       <div className="p-6 border-b border-light space-y-4">
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-main">
             History
           </h2>
-          {history.length > 0 && (
-            <button
-              onClick={onClearHistory}
-              className="text-xs text-muted hover:text-red-500 transition-colors font-medium cursor-pointer"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
+        </div> */}
 
         <div className="relative">
           <input

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { HistoryItem } from "@/types";
-import { formatBytes, generateObjectLabel } from "@/lib/utils";
+import { formatBytes, generateObjectLabel, convertImageBlob } from "@/lib/utils";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { DetailView } from "@/components/DetailView";
@@ -11,7 +11,7 @@ import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { StatusBar } from "@/components/StatusBar";
 import { Toast } from "@/components/Toast";
 import { NameModal } from "@/components/NameModal";
-import { saveFile, getFile, clearAllFiles } from "@/lib/db";
+import { saveFile, getFile, deleteFile, clearAllFiles } from "@/lib/db";
 import JSZip from "jszip";
 
 export default function PasteFever() {
@@ -136,7 +136,7 @@ export default function PasteFever() {
       const items = e.clipboardData?.items;
       if (!items) return;
 
-      for (let item of items) {
+      for (const item of items) {
         if (item.type.includes("image")) {
           const file = item.getAsFile();
           if (file) processImage(file);
@@ -144,7 +144,7 @@ export default function PasteFever() {
         }
       }
 
-      for (let item of items) {
+      for (const item of items) {
         if (item.type === "text/plain") {
           item.getAsString(processText);
           return;
@@ -154,6 +154,7 @@ export default function PasteFever() {
 
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, isNameModalOpen]);
 
   // Escape key for deselection
@@ -235,10 +236,40 @@ export default function PasteFever() {
     setStatusText("Awaiting filename...");
   };
 
-  const confirmDownload = async (finalName: string) => {
+  const confirmDownload = async (finalName: string, selectedExt: string) => {
     if (!pendingItem || !pendingBlob) return;
 
-    const data = { ...pendingItem, name: finalName };
+    const finalFullName = `${finalName}.${selectedExt}`;
+    let finalBlob = pendingBlob;
+
+    if (pendingItem.type === "image") {
+      setStatusText("Converting image...");
+      finalBlob = await convertImageBlob(pendingBlob, selectedExt);
+    } else if (pendingItem.type === "text") {
+      const mimeTypes: Record<string, string> = {
+        txt: "text/plain",
+        md: "text/plain",
+        json: "application/json",
+        html: "text/html",
+        css: "text/css",
+        js: "application/javascript"
+      };
+      const newMime = mimeTypes[selectedExt] || "text/plain";
+      finalBlob = pendingBlob.slice(0, pendingBlob.size, newMime);
+    }
+
+    // Revoke original object URL to avoid leaks
+    URL.revokeObjectURL(pendingItem.url);
+    const newUrl = URL.createObjectURL(finalBlob);
+
+    const data: HistoryItem = {
+      ...pendingItem,
+      name: finalFullName,
+      url: newUrl,
+      size: formatBytes(finalBlob.size),
+      sizeBytes: finalBlob.size,
+      extension: selectedExt.toUpperCase(),
+    };
 
     // Download
     const a = document.createElement("a");
@@ -248,7 +279,7 @@ export default function PasteFever() {
 
     // Persist blob to IndexedDB
     try {
-      await saveFile(data.timestamp, pendingBlob);
+      await saveFile(data.timestamp, finalBlob);
     } catch (e) {
       console.error("Failed to save to IndexedDB", e);
     }
@@ -279,6 +310,25 @@ export default function PasteFever() {
     a.download = data.name;
     a.click();
     showToastMessage("Downloaded");
+  };
+
+  const deleteHistoryItem = async (item: HistoryItem) => {
+    URL.revokeObjectURL(item.url);
+
+    const newHistory = history.filter((h) => h.timestamp !== item.timestamp);
+    setHistory(newHistory);
+    localStorage.setItem("pf-history", JSON.stringify(newHistory));
+
+    if (selectedItem?.timestamp === item.timestamp) {
+      setSelectedItem(null);
+    }
+
+    try {
+      await deleteFile(item.timestamp);
+      showToastMessage("Deleted successfully");
+    } catch (e) {
+      console.error("Failed to delete file", e);
+    }
   };
 
   const showToastMessage = (message: string) => {
@@ -349,10 +399,10 @@ export default function PasteFever() {
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-main">
       <Header
         history={history}
-        stats={stats}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
         onDownloadAll={downloadAllAsZip}
+        onClearHistory={clearHistory}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -362,7 +412,6 @@ export default function PasteFever() {
             stats={stats}
             selectedItem={selectedItem}
             onSelectItem={setSelectedItem}
-            onClearHistory={clearHistory}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
@@ -394,6 +443,7 @@ export default function PasteFever() {
             <PropertiesPanel
               selectedItem={selectedItem}
               onRedownload={redownload}
+              onDelete={deleteHistoryItem}
             />
           )}
         </main>

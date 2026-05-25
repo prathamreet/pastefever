@@ -1,23 +1,26 @@
 "use client";
 
 import { HistoryItem } from "@/types";
+import { formatTime } from "@/lib/utils";
 
 interface PropertiesPanelProps {
   selectedItem: HistoryItem;
   onRedownload: (item: HistoryItem) => void;
+  onDelete: (item: HistoryItem) => void;
 }
 
 export const PropertiesPanel = ({
   selectedItem,
   onRedownload,
+  onDelete,
 }: PropertiesPanelProps) => {
   return (
     <aside className="w-80 border-l border-main bg-alt flex flex-col transition-theme">
-      <div className="p-6 border-b border-light flex items-center h-16">
+      {/* <div className="p-6 border-b border-light flex items-center h-16">
         <h3 className="text-sm font-bold text-main">
           Details
         </h3>
-      </div>
+      </div> */}
 
       <div className="flex-1 overflow-y-auto p-6 space-y-8">
         <section>
@@ -71,19 +74,25 @@ export const PropertiesPanel = ({
             <div className="flex justify-between items-center">
               <span className="text-xs font-medium text-muted">Added</span>
               <span className="text-xs font-bold text-main">
-                {new Date(selectedItem.timestamp).toLocaleDateString()}
+                {formatTime(selectedItem.timestamp)}
               </span>
             </div>
           </div>
         </section>
       </div>
 
-      <div className="p-6 border-t border-light bg-main/30">
+      <div className="p-6 border-t border-light bg-main/30 space-y-3">
         <button
           onClick={() => onRedownload(selectedItem)}
-          className="w-full py-3 bg-accent text-alt text-sm font-bold rounded-xl hover:bg-main hover:text-main transition-all border border-transparent hover:border-border shadow-sm active:scale-[0.98]"
+          className="w-full py-3 bg-accent text-[var(--bg-alt)] hover:bg-soft text-sm font-semibold rounded-xl transition-all shadow-md shadow-accent/10 active:scale-[0.98] cursor-pointer"
         >
           Download File
+        </button>
+        <button
+          onClick={() => onDelete(selectedItem)}
+          className="w-full py-3 bg-main border border-border text-main hover:bg-border/30 text-sm font-semibold rounded-xl transition-all active:scale-[0.98] cursor-pointer text-center"
+        >
+          Delete Item
         </button>
       </div>
     </aside>

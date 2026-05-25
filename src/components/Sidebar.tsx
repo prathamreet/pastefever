@@ -14,6 +14,7 @@ interface SidebarProps {
   onSelectItem: (item: HistoryItem) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onClose?: () => void;
 }
 
 export const Sidebar = ({
@@ -23,15 +24,25 @@ export const Sidebar = ({
   onSelectItem,
   searchQuery,
   onSearchChange,
+  onClose,
 }: SidebarProps) => {
   return (
-    <aside className="w-full border-r border-main bg-alt flex flex-col transition-theme">
+    <aside className="w-full border-r border-main bg-alt flex flex-col transition-theme h-full">
       <div className="p-6 border-b border-light space-y-4">
-        {/* <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-main">
-            History
-          </h2>
-        </div> */}
+        {onClose && (
+          <div className="flex items-center justify-between md:hidden">
+            <h2 className="text-base font-bold text-main">History</h2>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg hover:bg-main text-muted hover:text-main cursor-pointer transition-all"
+              title="Close Sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         <div className="relative">
           <input

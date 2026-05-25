@@ -23,6 +23,7 @@ export default function PasteFever() {
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const filteredHistory = history.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -194,6 +195,44 @@ export default function PasteFever() {
       complete(item, blob);
     };
     img.src = url;
+  };
+
+  const handleMobilePaste = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.read) {
+        const clipboardItems = await navigator.clipboard.read();
+        for (const item of clipboardItems) {
+          const imageType = item.types.find(type => type.startsWith("image/"));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            processImage(blob);
+            return;
+          }
+          const textType = item.types.find(type => type === "text/plain");
+          if (textType) {
+            const blob = await item.getType(textType);
+            const text = await blob.text();
+            processText(text);
+            return;
+          }
+        }
+      }
+      
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          processText(text);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Direct clipboard reading blocked or failed, using fallback paste modal", err);
+    }
+
+    const text = prompt("Paste your text here:");
+    if (text && text.trim().length > 0) {
+      processText(text);
+    }
   };
 
   const processText = (text: string) => {
@@ -396,40 +435,64 @@ export default function PasteFever() {
   })();
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-main">
+    <div className="h-[100dvh] w-full max-w-full overflow-hidden flex flex-col bg-main">
       <Header
         history={history}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
         onDownloadAll={downloadAllAsZip}
         onClearHistory={clearHistory}
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        onPasteClick={handleMobilePaste}
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        <div style={{ width: `${sidebarWidth}px` }} className="flex">
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Mobile Sidebar Overlay Backdrop */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar Wrapper Container */}
+        <div
+          style={{
+            "--sidebar-width": `${sidebarWidth}px`,
+          } as React.CSSProperties}
+          className={`
+            fixed inset-y-0 left-0 z-50 flex transition-transform duration-300 ease-in-out md:static md:translate-x-0 h-full shrink-0
+            w-full md:w-[var(--sidebar-width)]
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          `}
+        >
           <Sidebar
             history={filteredHistory}
             stats={stats}
             selectedItem={selectedItem}
-            onSelectItem={setSelectedItem}
+            onSelectItem={(item) => {
+              setSelectedItem(item);
+              setIsSidebarOpen(false); // Close sidebar on mobile select
+            }}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            onClose={() => setIsSidebarOpen(false)}
           />
           <div
             onMouseDown={() => setIsResizing(true)}
-            className={`w-1 h-full cursor-col-resize hover:bg-accent transition-colors shrink-0 z-50 ${isResizing ? "bg-accent" : "bg-transparent"}`}
+            className={`hidden md:block w-1 h-full cursor-col-resize hover:bg-accent transition-colors shrink-0 z-50 ${isResizing ? "bg-accent" : "bg-transparent"}`}
           />
         </div>
 
-        <main className="flex-1 flex transition-theme relative">
-          <div className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col md:flex-row transition-theme relative overflow-hidden min-h-0">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {selectedItem ? (
               <DetailView 
                 selectedItem={selectedItem} 
                 onCopySuccess={showToastMessage}
               />
             ) : (
-              <EmptyState isProcessing={isProcessing} />
+              <EmptyState isProcessing={isProcessing} onPasteClick={handleMobilePaste} />
             )}
 
             <StatusBar

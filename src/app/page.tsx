@@ -11,7 +11,7 @@ import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { StatusBar } from "@/components/StatusBar";
 import { Toast } from "@/components/Toast";
 import { NameModal } from "@/components/NameModal";
-import { saveFile, getFile, clearAllFiles } from "@/lib/db";
+import { saveFile, getFile, deleteFile, clearAllFiles } from "@/lib/db";
 import JSZip from "jszip";
 
 export default function PasteFever() {
@@ -311,6 +311,25 @@ export default function PasteFever() {
     showToastMessage("Downloaded");
   };
 
+  const deleteHistoryItem = async (item: HistoryItem) => {
+    URL.revokeObjectURL(item.url);
+
+    const newHistory = history.filter((h) => h.timestamp !== item.timestamp);
+    setHistory(newHistory);
+    localStorage.setItem("pf-history", JSON.stringify(newHistory));
+
+    if (selectedItem?.timestamp === item.timestamp) {
+      setSelectedItem(null);
+    }
+
+    try {
+      await deleteFile(item.timestamp);
+      showToastMessage("Deleted successfully");
+    } catch (e) {
+      console.error("Failed to delete file", e);
+    }
+  };
+
   const showToastMessage = (message: string) => {
     setToastMessage(message);
     setShowToast(true);
@@ -383,6 +402,7 @@ export default function PasteFever() {
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
         onDownloadAll={downloadAllAsZip}
+        onClearHistory={clearHistory}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -392,7 +412,6 @@ export default function PasteFever() {
             stats={stats}
             selectedItem={selectedItem}
             onSelectItem={setSelectedItem}
-            onClearHistory={clearHistory}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
@@ -424,6 +443,7 @@ export default function PasteFever() {
             <PropertiesPanel
               selectedItem={selectedItem}
               onRedownload={redownload}
+              onDelete={deleteHistoryItem}
             />
           )}
         </main>
